@@ -5,7 +5,7 @@ import datetime as dt
 import indicator_calculator as ic
 import pandas_datareader.data as web
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # global variable 
 
@@ -20,10 +20,17 @@ def fetchTicker():
 
 def fetchTickerData():
     global ticker
-    data = get_history(ticker,start=dt.date(2014,10,1),end=dt.date(2019,12,31))
+    data = get_history(ticker,start=dt.date(2014,10,1),end=dt.date(2020,2,20))
     data = pd.DataFrame(data)
     data = data.drop(columns = ['Volume','Turnover', 'Trades', 'Deliverable Volume','%Deliverble'])
     return data
+
+def fetchTickerData2(ticker):
+    data = get_history(ticker,start=dt.date(2014,10,1),end=dt.date(2020,2,20))
+    data = pd.DataFrame(data)
+    data = data.drop(columns = ['Volume','Turnover', 'Trades', 'Deliverable Volume','%Deliverble'])
+    return data
+
 
 def senkouBull(red,senkouA,senkouB):
     if red:
@@ -44,6 +51,9 @@ def inrange(value,high,low):
         return True
     return False
 
+def initialise():
+    global profit
+    profit = []
 
 
 
@@ -70,7 +80,7 @@ def trading(data):
     # stoploss = 0
     
     
-    for i in range(51,data.shape[0]):
+    for i in range(51,data.shape[0]-28):
         curr_conv = data['Conversion Line'][i]
         curr_base = data['Base Line'][i]
         prev_senkou_a = data['Senkou A'][i-1]
@@ -82,7 +92,8 @@ def trading(data):
         curr_close = data['Close'][i]
         prev_close = data['Close'][i-1]
         low_prev26_day = data['Low'][i-25]
-        
+        future_senkou_A = data['Senkou A'][i+26]
+        future_senkou_B = data['Senkou B'][i+26]
         # conditions in brief
         # for a bullish entry -
         # 1 bullish T/K crossover 
@@ -91,7 +102,7 @@ def trading(data):
         
         if bought == False:
             # bullish entries
-            if high_prev26_day<lag_span:
+            if (high_prev26_day<lag_span) and (future_senkou_A>future_senkou_B):
                 
                 if curr_conv>curr_base:
                     # green cloud breakout normal
@@ -172,7 +183,7 @@ def trading(data):
     stoploss = 0
     
     
-    for i in range(data.shape[0]):
+    for i in range(51,data.shape[0]-28):
         curr_conv = data['Conversion Line'][i]
         curr_base = data['Base Line'][i]
         prev_senkou_a = data['Senkou A'][i-1]
@@ -183,10 +194,13 @@ def trading(data):
         low_prev26_day = data['Low'][i-26]
         curr_close = data['Close'][i]
         prev_close = data['Close'][i-1]
-    
+        future_senkou_A = data['Senkou A'][i+26]
+        future_senkou_B = data['Senkou B'][i+26]
+        
+        
         if sold == False:
             #bearish entries
-            if lag_span<low_prev26_day:
+            if (lag_span<low_prev26_day ) and (future_senkou_B>future_senkou_A):
                 
                 if curr_base>curr_conv:
                     
