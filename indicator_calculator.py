@@ -17,7 +17,7 @@ def add_base_line(data):
 
 def add_lagging_span(data):
     close_prices = data['Close']
-    data['Lagging span'] = close_prices.shift(-25)
+    data['Lagging span'] = close_prices
     return data
 
 def add_Kumo_cloud(data):
@@ -42,7 +42,7 @@ def adding_all_indicators(data):
     data['Base Line'] = (period26_high + period26_low) / 2
     
     close_prices = data['Close']
-    data['Lagging span'] = close_prices.shift(-25)
+    data['Lagging span'] = close_prices
     
     data['Senkou A'] = ((data['Conversion Line'] + data['Base Line']) / 2).shift(25)
     period52_high = high_prices.rolling(window=52).max()
